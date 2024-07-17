@@ -31,10 +31,10 @@ public class StreamsTask {
 
         Collection<User> women = findWomen(users);
         Double averageMenAge = averageMenAge(users);
-        Map<Long, List<Expense>> expensesByUserId_v1 = groupExpensesByUserId_v1(expenses);
-        Map<Long, List<Expense>> expensesByUserId_v2 = groupExpensesByUserId_v2(users, expenses);
-        Map<User, List<Expense>> expensesByUser_v1 = groupExpensesByUser_v1(users, expenses);
-        Map<User, List<Expense>> expensesByUser_v2 = groupExpensesByUser_v2(users, expenses);
+        Map<Long, List<Expense>> expensesByUserId_v1 = groupExpensesByUserIdVersion1(expenses);
+        Map<Long, List<Expense>> expensesByUserId_v2 = groupExpensesByUserIdVersion2(users, expenses);
+        Map<User, List<Expense>> expensesByUser_v1 = groupExpensesByUserVersion1(users, expenses);
+        Map<User, List<Expense>> expensesByUser_v2 = groupExpensesByUserVersion2(users, expenses);
     }
 
     // metoda powinna zwracać listę kobiet (sprawdzając, czy imię kończy się na "a")
@@ -55,13 +55,13 @@ public class StreamsTask {
 
     // metoda powinna zwracać wydatki zgrupowane po ID użytkownika
     // Collection<User> users wydał mi się niepotrzebny jako argument, dlatego go usunąłem
-    Map<Long, List<Expense>> groupExpensesByUserId_v1(List<Expense> expenses) {
+    Map<Long, List<Expense>> groupExpensesByUserIdVersion1(List<Expense> expenses) {
         return expenses.stream().collect(Collectors.groupingBy(Expense::getUserId));
     }
 
     // Druga wersja powyższej metody, tym razem zestawiająca w oryginalnej kolejności (dzięki LinkedHashMap)
     // wszystkich userów, nie tylko tych z jakimiś wydatkami
-    Map<Long, List<Expense>> groupExpensesByUserId_v2(Collection<User> users, List<Expense> expenses) {
+    Map<Long, List<Expense>> groupExpensesByUserIdVersion2(Collection<User> users, List<Expense> expenses) {
         return users.stream()
                 .collect(Collectors.toMap(
                         User::getId,
@@ -75,7 +75,7 @@ public class StreamsTask {
 
     // metoda powinna zwracać wydatki zgrupowane po użytkowniku
     // podobne do poprzedniego, ale trochę trudniejsze
-    Map<User, List<Expense>> groupExpensesByUser_v1(Collection<User> users, List<Expense> expenses) {
+    Map<User, List<Expense>> groupExpensesByUserVersion1(Collection<User> users, List<Expense> expenses) {
         return expenses.stream()
                 .collect(Collectors.groupingBy(expense -> users.stream()
                         .filter(u -> u.getId() == expense.getUserId())
@@ -86,7 +86,7 @@ public class StreamsTask {
 
 //    Druga wersja powyższej metody, tym razem zestawiająca w oryginalnej kolejności (dzięki LinkedHashMap)
 //    wszystkich userów, nie tylko tych z jakimiś wydatkami
-    Map<User, List<Expense>> groupExpensesByUser_v2(Collection<User> users, List<Expense> expenses) {
+    Map<User, List<Expense>> groupExpensesByUserVersion2(Collection<User> users, List<Expense> expenses) {
         return users.stream()
                 .collect(Collectors.toMap(
                         Function.identity(),

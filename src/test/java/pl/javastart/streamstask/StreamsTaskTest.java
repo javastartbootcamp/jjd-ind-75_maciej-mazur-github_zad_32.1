@@ -82,7 +82,7 @@ public class StreamsTaskTest {
     void shouldGroupExpensesByUserId_v1() {
 
         // when
-        Map<Long, List<Expense>> expensesByUserId = streamsTask.groupExpensesByUserId_v1(expenses);
+        Map<Long, List<Expense>> expensesByUserId = streamsTask.groupExpensesByUserIdVersion1(expenses);
         String user1ExpensesConcatenatedNames = getConcatenatedExpenseNames(1L, expensesByUserId);
         String user2ExpensesConcatenatedNames = getConcatenatedExpenseNames(2L, expensesByUserId);
 
@@ -101,7 +101,7 @@ public class StreamsTaskTest {
     void shouldGroupExpensesByUserId_v2() {
 
         // when
-        Map<Long, List<Expense>> expensesByUserId = streamsTask.groupExpensesByUserId_v2(users, expenses);
+        Map<Long, List<Expense>> expensesByUserId = streamsTask.groupExpensesByUserIdVersion2(users, expenses);
         String user1ExpensesConcatenatedNames = getConcatenatedExpenseNames(1L, expensesByUserId);
         String user2ExpensesConcatenatedNames = getConcatenatedExpenseNames(2L, expensesByUserId);
 
@@ -124,7 +124,7 @@ public class StreamsTaskTest {
     void shouldGroupExpensesByUser_v1() {
 
         //when
-        Map<User, List<Expense>> expensesByUser = streamsTask.groupExpensesByUser_v1(users, expenses);
+        Map<User, List<Expense>> expensesByUser = streamsTask.groupExpensesByUserVersion1(users, expenses);
 
         // then
         assertThat(expensesByUser.size()).isEqualTo(2);
@@ -137,7 +137,7 @@ public class StreamsTaskTest {
     @Test
     void shouldGroupExpensesByUser_v2() {
         //when
-        Map<User, List<Expense>> expensesByUser = streamsTask.groupExpensesByUser_v2(users, expenses);
+        Map<User, List<Expense>> expensesByUser = streamsTask.groupExpensesByUserVersion2(users, expenses);
 
         // then
         assertThat(expensesByUser.size()).isEqualTo(6);
