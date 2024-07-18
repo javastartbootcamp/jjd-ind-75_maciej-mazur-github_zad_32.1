@@ -66,7 +66,7 @@ public class StreamsTask {
                 .collect(Collectors.toMap(
                         User::getId,
                         user -> expenses.stream()
-                                .filter(expense -> expense.getUserId() == user.getId())
+                                .filter(expense -> Objects.equals(expense.getUserId(), user.getId()))
                                 .collect(Collectors.toList()),
                         (x, y) -> y,
                         LinkedHashMap::new
@@ -76,23 +76,22 @@ public class StreamsTask {
     // metoda powinna zwracać wydatki zgrupowane po użytkowniku
     // podobne do poprzedniego, ale trochę trudniejsze
     Map<User, List<Expense>> groupExpensesByUserVersion1(Collection<User> users, List<Expense> expenses) {
+        Map<Long, User> usersGroupedById = users.stream().collect(Collectors.toMap(User::getId, Function.identity()));
+
         return expenses.stream()
-                .collect(Collectors.groupingBy(expense -> users.stream()
-                        .filter(u -> u.getId() == expense.getUserId())
-                        .findFirst()
-                        .orElseThrow()
-                ));
+                .collect(Collectors.groupingBy(expense -> usersGroupedById.get(expense.getUserId())));
     }
 
 //    Druga wersja powyższej metody, tym razem zestawiająca w oryginalnej kolejności (dzięki LinkedHashMap)
 //    wszystkich userów, nie tylko tych z jakimiś wydatkami
     Map<User, List<Expense>> groupExpensesByUserVersion2(Collection<User> users, List<Expense> expenses) {
+        Map<Long, List<Expense>> expensesGroupedById = expenses.stream().collect(Collectors.groupingBy(Expense::getUserId));
+        
         return users.stream()
                 .collect(Collectors.toMap(
                         Function.identity(),
-                        user -> expenses.stream()
-                                .filter(expense -> expense.getUserId() == user.getId())
-                                .collect(Collectors.toList()),
+                        user -> expensesGroupedById
+                                .get(user.getId()) == null ? new ArrayList<>() : expensesGroupedById.get(user.getId()),
                         (x, y) -> y,
                         LinkedHashMap::new
                 ));

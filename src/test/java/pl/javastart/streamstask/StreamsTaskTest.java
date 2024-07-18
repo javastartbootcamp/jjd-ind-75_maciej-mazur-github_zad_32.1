@@ -8,7 +8,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import static org.assertj.core.api.Assertions.*;
 
@@ -63,6 +62,8 @@ public class StreamsTaskTest {
         Collection<User> women = streamsTask.findWomen(users);
 
         // then
+        assertThat(women.size()).isEqualTo(2);
+
         for (User woman : women) {
             assertThat(woman.getName()).endsWith("a");
         }
@@ -83,18 +84,15 @@ public class StreamsTaskTest {
 
         // when
         Map<Long, List<Expense>> expensesByUserId = streamsTask.groupExpensesByUserIdVersion1(expenses);
-        String user1ExpensesConcatenatedNames = getConcatenatedExpenseNames(1L, expensesByUserId);
-        String user2ExpensesConcatenatedNames = getConcatenatedExpenseNames(2L, expensesByUserId);
+        List<Expense> user1Expenses = expensesByUserId.get(1L);
+        List<Expense> user2Expenses = expensesByUserId.get(2L);
 
         // then
         assertThat(expensesByUserId.size()).isEqualTo(2);
-        assertThat(expensesByUserId.get(1L).size()).isEqualTo(2);
-        assertThat(expensesByUserId.get(2L).size()).isEqualTo(3);
-        assertThat(user1ExpensesConcatenatedNames).contains("Buty");
-        assertThat(user1ExpensesConcatenatedNames).contains("Sałatka");
-        assertThat(user2ExpensesConcatenatedNames).contains("Bluza");
-        assertThat(user2ExpensesConcatenatedNames).contains("Skarpetki");
-        assertThat(user2ExpensesConcatenatedNames).contains("Pizza");
+        assertThat(user1Expenses.size()).isEqualTo(2);
+        assertThat(user2Expenses.size()).isEqualTo(3);
+        assertThat(user1Expenses).contains(expense1, expense2);
+        assertThat(user2Expenses).contains(expense3, expense4, expense5);
     }
 
     @Test
@@ -102,18 +100,15 @@ public class StreamsTaskTest {
 
         // when
         Map<Long, List<Expense>> expensesByUserId = streamsTask.groupExpensesByUserIdVersion2(users, expenses);
-        String user1ExpensesConcatenatedNames = getConcatenatedExpenseNames(1L, expensesByUserId);
-        String user2ExpensesConcatenatedNames = getConcatenatedExpenseNames(2L, expensesByUserId);
+        List<Expense> user1Expenses = expensesByUserId.get(1L);
+        List<Expense> user2Expenses = expensesByUserId.get(2L);
 
         // then
         assertThat(expensesByUserId.size()).isEqualTo(6);
-        assertThat(expensesByUserId.get(1L).size()).isEqualTo(2);
-        assertThat(expensesByUserId.get(2L).size()).isEqualTo(3);
-        assertThat(user1ExpensesConcatenatedNames).contains("Buty");
-        assertThat(user1ExpensesConcatenatedNames).contains("Sałatka");
-        assertThat(user2ExpensesConcatenatedNames).contains("Bluza");
-        assertThat(user2ExpensesConcatenatedNames).contains("Skarpetki");
-        assertThat(user2ExpensesConcatenatedNames).contains("Pizza");
+        assertThat(user1Expenses.size()).isEqualTo(2);
+        assertThat(user2Expenses.size()).isEqualTo(3);
+        assertThat(user1Expenses).contains(expense1, expense2);
+        assertThat(user2Expenses).contains(expense3, expense4, expense5);
 
         for (long i = 3; i <= 6; i++) {
             assertThat(expensesByUserId.get(i).size()).isEqualTo(0);
@@ -125,40 +120,35 @@ public class StreamsTaskTest {
 
         //when
         Map<User, List<Expense>> expensesByUser = streamsTask.groupExpensesByUserVersion1(users, expenses);
+        List<Expense> user1Expenses = expensesByUser.get(user1);
+        List<Expense> user2Expenses = expensesByUser.get(user2);
 
         // then
         assertThat(expensesByUser.size()).isEqualTo(2);
-        assertThat(expensesByUser.get(user1).size()).isEqualTo(2);
-        assertThat(expensesByUser.get(user2).size()).isEqualTo(3);
-        assertThat(expensesByUser.get(user1)).contains(expense1, expense2);
-        assertThat(expensesByUser.get(user2)).contains(expense3, expense4, expense5);
+        assertThat(user1Expenses.size()).isEqualTo(2);
+        assertThat(user2Expenses.size()).isEqualTo(3);
+        assertThat(user1Expenses).contains(expense1, expense2);
+        assertThat(user2Expenses).contains(expense3, expense4, expense5);
     }
 
     @Test
     void shouldGroupExpensesByUser_v2() {
         //when
         Map<User, List<Expense>> expensesByUser = streamsTask.groupExpensesByUserVersion2(users, expenses);
+        List<Expense> user1Expenses = expensesByUser.get(user1);
+        List<Expense> user2Expenses = expensesByUser.get(user2);
 
         // then
         assertThat(expensesByUser.size()).isEqualTo(6);
-        assertThat(expensesByUser.get(user1).size()).isEqualTo(2);
-        assertThat(expensesByUser.get(user2).size()).isEqualTo(3);
-        assertThat(expensesByUser.get(user1)).contains(expense1, expense2);
-        assertThat(expensesByUser.get(user2)).contains(expense3, expense4, expense5);
+        assertThat(user1Expenses.size()).isEqualTo(2);
+        assertThat(user2Expenses.size()).isEqualTo(3);
+        assertThat(user1Expenses).contains(expense1, expense2);
+        assertThat(user2Expenses).contains(expense3, expense4, expense5);
 
         for (Map.Entry<User, List<Expense>> entry : expensesByUser.entrySet()) {
             if (!entry.getKey().equals(user1) && !entry.getKey().equals(user2)) {
                 assertThat(entry.getValue().size()).isEqualTo(0);
             }
         }
-    }
-
-    private String getConcatenatedExpenseNames(long userId, Map<Long, List<Expense>> expensesByUserId) {
-        return expensesByUserId.entrySet().stream()
-                .filter(entry -> entry.getKey() == userId)
-                .map(Map.Entry::getValue)
-                .flatMap(List::stream)
-                .map(Expense::getName)
-                .collect(Collectors.joining(" "));
     }
 }
