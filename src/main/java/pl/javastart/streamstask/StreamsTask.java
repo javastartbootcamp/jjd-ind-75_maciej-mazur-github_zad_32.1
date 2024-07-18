@@ -31,10 +31,10 @@ public class StreamsTask {
 
         Collection<User> women = findWomen(users);
         Double averageMenAge = averageMenAge(users);
-        Map<Long, List<Expense>> expensesByUserId_v1 = groupExpensesByUserIdVersion1(expenses);
-        Map<Long, List<Expense>> expensesByUserId_v2 = groupExpensesByUserIdVersion2(users, expenses);
-        Map<User, List<Expense>> expensesByUser_v1 = groupExpensesByUserVersion1(users, expenses);
-        Map<User, List<Expense>> expensesByUser_v2 = groupExpensesByUserVersion2(users, expenses);
+        Map<Long, List<Expense>> expensesByUserIdVersion1 = groupExpensesByUserIdVersion1(expenses);
+        Map<Long, List<Expense>> expensesByUserIdVersion2 = groupExpensesByUserIdVersion2(users, expenses);
+        Map<User, List<Expense>> expensesByUserVersion1 = groupExpensesByUserVersion1(users, expenses);
+        Map<User, List<Expense>> expensesByUserVersion2 = groupExpensesByUserVersion2(users, expenses);
     }
 
     // metoda powinna zwracać listę kobiet (sprawdzając, czy imię kończy się na "a")
