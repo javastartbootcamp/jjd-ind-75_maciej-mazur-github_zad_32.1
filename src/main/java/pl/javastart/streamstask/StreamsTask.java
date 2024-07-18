@@ -1,10 +1,9 @@
 package pl.javastart.streamstask;
 
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
 
 public class StreamsTask {
 
@@ -32,28 +31,69 @@ public class StreamsTask {
 
         Collection<User> women = findWomen(users);
         Double averageMenAge = averageMenAge(users);
-        Map<Long, List<Expense>> expensesByUserId = groupExpensesByUserId(users, expenses);
-        Map<User, List<Expense>> expensesByUser = groupExpensesByUser(users, expenses);
+        Map<Long, List<Expense>> expensesByUserIdVersion1 = groupExpensesByUserIdVersion1(expenses);
+        Map<Long, List<Expense>> expensesByUserIdVersion2 = groupExpensesByUserIdVersion2(users, expenses);
+        Map<User, List<Expense>> expensesByUserVersion1 = groupExpensesByUserVersion1(users, expenses);
+        Map<User, List<Expense>> expensesByUserVersion2 = groupExpensesByUserVersion2(users, expenses);
     }
 
     // metoda powinna zwracać listę kobiet (sprawdzając, czy imię kończy się na "a")
     Collection<User> findWomen(Collection<User> users) {
-        throw new RuntimeException("Not implemented");
+        return users.stream()
+                .filter(u -> u.getName().endsWith("a"))
+                .collect(Collectors.toList());
     }
 
     // metoda powinna zwracać średni wiek mężczyzn (sprawdzając, czy imię nie kończy się na "a")
     Double averageMenAge(Collection<User> users) {
-        throw new RuntimeException("Not implemented");
+        return users.stream()
+                .filter(u -> !u.getName().endsWith("a"))
+                .mapToInt(User::getAge)
+                .average()
+                .getAsDouble();
     }
 
     // metoda powinna zwracać wydatki zgrupowane po ID użytkownika
-    Map<Long, List<Expense>> groupExpensesByUserId(Collection<User> users, List<Expense> expenses) {
-        throw new RuntimeException("Not implemented");
+    // Collection<User> users wydał mi się niepotrzebny jako argument, dlatego go usunąłem
+    Map<Long, List<Expense>> groupExpensesByUserIdVersion1(List<Expense> expenses) {
+        return expenses.stream().collect(Collectors.groupingBy(Expense::getUserId));
+    }
+
+    // Druga wersja powyższej metody, tym razem zestawiająca w oryginalnej kolejności (dzięki LinkedHashMap)
+    // wszystkich userów, nie tylko tych z jakimiś wydatkami
+    Map<Long, List<Expense>> groupExpensesByUserIdVersion2(Collection<User> users, List<Expense> expenses) {
+        return users.stream()
+                .collect(Collectors.toMap(
+                        User::getId,
+                        user -> expenses.stream()
+                                .filter(expense -> Objects.equals(expense.getUserId(), user.getId()))
+                                .collect(Collectors.toList()),
+                        (x, y) -> y,
+                        LinkedHashMap::new
+                ));
     }
 
     // metoda powinna zwracać wydatki zgrupowane po użytkowniku
     // podobne do poprzedniego, ale trochę trudniejsze
-    Map<User, List<Expense>> groupExpensesByUser(Collection<User> users, List<Expense> expenses) {
-        throw new RuntimeException("Not implemented");
+    Map<User, List<Expense>> groupExpensesByUserVersion1(Collection<User> users, List<Expense> expenses) {
+        Map<Long, User> usersGroupedById = users.stream().collect(Collectors.toMap(User::getId, Function.identity()));
+
+        return expenses.stream()
+                .collect(Collectors.groupingBy(expense -> usersGroupedById.get(expense.getUserId())));
+    }
+
+//    Druga wersja powyższej metody, tym razem zestawiająca w oryginalnej kolejności (dzięki LinkedHashMap)
+//    wszystkich userów, nie tylko tych z jakimiś wydatkami
+    Map<User, List<Expense>> groupExpensesByUserVersion2(Collection<User> users, List<Expense> expenses) {
+        Map<Long, List<Expense>> expensesGroupedById = expenses.stream().collect(Collectors.groupingBy(Expense::getUserId));
+        
+        return users.stream()
+                .collect(Collectors.toMap(
+                        Function.identity(),
+                        user -> expensesGroupedById
+                                .get(user.getId()) == null ? new ArrayList<>() : expensesGroupedById.get(user.getId()),
+                        (x, y) -> y,
+                        LinkedHashMap::new
+                ));
     }
 }
